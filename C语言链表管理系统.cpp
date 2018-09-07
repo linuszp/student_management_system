@@ -8,12 +8,12 @@
 typedef struct student{
     int num;//学号
 	char name[20];//姓名
-	int studentclass[20];//班级
+	int studentclass;//班级
 	int dorm;//宿舍号
     struct student *next;
 }stu;
+stu *head;
 int n;
-int sum; 
 int Tips()
 {
     int p;
@@ -34,12 +34,12 @@ int Tips()
 /*创建*/
 stu * creat()
 {
-    stu *p1,*p2,*head;int i,k=1;
+    stu *p1,*p2,*head;int i,k=1,sum;
     n=0;
     printf("输入学生信息的个数\n");
     scanf("%d",&sum);
 
-    head=0;
+    //head=0;
     for(i=0;i<sum;i++)
     {
         p1=(stu *)malloc(len);
@@ -142,53 +142,68 @@ stu *insert(stu * head, stu * stud)
     return head;
 }
 
-/*保存*/
-void save(stu * head,int t)
 
+
+int save(stu *p)
 {
-	stu * p;
-    p=head;
-	FILE*fp;
-    int i;
-	t=sum;
-	if ((fp = fopen("E:\git", "wb")) == NULL)
-	{
-		printf("写文件错误!\n");
-		return;
-	}
-
-	for (i = 0;i<=sum; i++)
-		if (fwrite(p, sizeof(stu), 1, fp) != 1)
-			printf("写文件错误!\n");
-	fclose(fp);
-
-}
-
-/*加载*/
-void read(stu * head)
-{   stu * p,*r;
 	FILE *fp;
-	head->next=NULL;
-	r=head;
-	if ((fp = fopen("E:\git", "rb")) == NULL)
+	stu *head;
+	head = p;//p为已经构建好的链表
+	if ((fp = fopen("data.txt", "ab+")) == NULL)
 	{
-		printf("\n\n*****库存文件不存在！请创");
+		printf("无法打开!\n");
+		return -1;
 	}
-	printf("开始加载\n");
-	while(!feof(fp))
-	{p=(stu*)malloc(sizeof(stu));
-	 if(fread(p, sizeof(stu), 1, fp)!=1)
-			break;
-	 else
-	 {p->next=NULL;
-	 	r->next=p;
-	 	r=p;
-	 }
+	while (p != NULL)
+	{
 
+		fwrite(p, sizeof(stu), 1, fp);
+		p = p->next;
 	}
 	fclose(fp);
-//	getch();
-}
+	return 1;
+}//储存链表到文件
+
+
+stu* read()
+{
+	FILE *fp;
+	if ((fp = fopen("data.txt", "rb")) == NULL)
+	{
+		printf("无法读取\n");
+		return NULL;
+	}
+	int sign;
+	stu *s,*p,*head;
+	
+	head= (stu*)malloc(sizeof(stu));
+	if (head == NULL)
+	{
+		printf("读取失败！内存空间申请不足！\n");
+		return NULL;
+	}
+	fseek(fp, 0, SEEK_END);
+	if (ftell(fp) == 0)
+	{
+		return NULL;
+	}
+	p = head;
+	p->next = NULL;
+	while (!feof(fp))
+	{
+		s = (stu*)malloc(sizeof(stu));
+		fread(s, sizeof(stu), 1, fp);
+		p->next = s;
+		p = s;
+		p->next = NULL;
+	}
+	fclose(fp);
+	return head;
+}//读取文件到链表
+
+
+
+
 
 
 /*输出*/
@@ -292,11 +307,11 @@ int main()
             }
             case 4:{//保存 
             	system("cls");
-            	save(head,sum);
+            	save(head);
 		           }
 		    case 5:{//加载 
             	system("cls");
-            	read(head); 
+            	read( ); 
 		           }
        }
     }
